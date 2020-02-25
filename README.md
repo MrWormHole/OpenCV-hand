@@ -1,5 +1,5 @@
 # OpenCV-hand
-Hand and finger detection with the essentials of OpenCV. Working on improvements for bugs
+Hand and finger detection with the essentials of OpenCV. Working on improvements and bugs
 
 ### Required Dependencies(!order is important!)
 * Python == 3.7.4

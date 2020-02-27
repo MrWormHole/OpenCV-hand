@@ -89,6 +89,7 @@ def count_fingers(thresholded, hand_segment):
     # Grab the largest distance
     max_distance = distance.max()
     
+    
     # Create a circle with 90% radius of the max euclidean distance
     radius = int(0.8 * max_distance)
     circumference = (2 * np.pi * radius)

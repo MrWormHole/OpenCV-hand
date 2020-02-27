@@ -9,3 +9,22 @@ Hand and finger detection with the essentials of OpenCV. Working on improvements
 * scipy == 1.4.0
 * scikit-learn == 0.19.2
 * opencv-python == 3.4.2.16
+
+### Getting Started(Windows Guide)
+
+```
+pip install pipenv
+```
+
+```
+pipenv install
+```
+
+```
+pipenv shell
+```
+
+```
+python main.py
+```
+

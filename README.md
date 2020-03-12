@@ -12,18 +12,19 @@ Hand and finger detection with the essentials of OpenCV. Working on improvements
 
 ### Getting Started(Windows Guide)
 
+Install pipenv for managing virtualenvs
 ```
 pip install pipenv
 ```
-
+Go into the right directory where pipfile exists and install dependencies with creating virtual env
 ```
-pipenv install
+pipenv install --skip-lock
 ```
-
+Activate virtual env in the same directory of the project where pipfile exists
 ```
 pipenv shell
 ```
-
+Launch the program
 ```
 python main.py
 ```

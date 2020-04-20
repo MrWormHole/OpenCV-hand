@@ -7,62 +7,49 @@ from sklearn.metrics import pairwise
 # This background will be a global variable that we update through a few functions
 background = None
 
-# Start with a halfway point between 0 and 1 of accumulated weight
-accumulated_weight = 0.5
-
-
-# Manually set up our ROI for grabbing the hand.
-# Feel free to change these. I just chose t
-# the top right corner for filming.
+# Region Of Interest
 roi_top = 20
 roi_bottom = 300
 roi_right = 300
 roi_left = 600
 
-def calc_accum_avg(frame, accumulated_weight):
+def accumulate(frame, accumulated_weight = 0.5):
     '''
-    Given a frame and a previous accumulated weight, computed the weighted average of the image passed in.
+        Given a frame and accumulated weight, compute the weighted average
     '''
-    
-    # Grab the background
     global background
     
-    # For first time, create the background from a copy of the frame.
+    # For first time only, create the background from a copy of the frame.
     if background is None:
         background = frame.copy().astype("float")
         return None
 
-    # compute weighted average, accumulate it and update the background
+    # Compute weighted average then accumulate it and update the background
     cv2.accumulateWeighted(frame, background, accumulated_weight)
 
-def segment(frame, threshold=25):
+def segment(frame, threshold = 25):
+    '''
+        Given a frame and threshold, compute countours of foreground and pick the largest area as hand segment
+    '''
     global background
     
-    # Calculates the Absolute Differentce between the backgroud and the passed in frame
+    # Calculate absolute difference between the backgroud and the passed in frame
     diff = cv2.absdiff(background.astype("uint8"), frame)
 
-    # Apply a threshold to the image so we can grab the foreground
-    # We only need the threshold, so we will throw away the first item in the tuple with an underscore _
+    # Apply a threshold to the difference to get the foreground
     _ , thresholded = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)
 
-    # Grab the external contours form the image
-    # Again, only grabbing what we need here and throwing away the rest
+    # Grab the external contours from thresholded foreground
     image, contours, hierarchy = cv2.findContours(thresholded.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # If length of contours list is 0, then we didn't grab any contours!
-    if len(contours) == 0:
-        return None
-    else:
-        # Given the way we are using the program, the largest external contour should be the hand (largest by area)
-        # This will be our segment
+    if len(contours) != 0:
+        # If length of contours list is not 0, then get the largest external contour area as hand segment
         hand_segment = max(contours, key=cv2.contourArea)
-        
-        # Return both the hand segment and the thresholded hand image
         return (thresholded, hand_segment)
+    
+    return None
 
 def count_fingers(thresholded, hand_segment):
-    
-    
     # Calculated the convex hull of the hand segment
     conv_hull = cv2.convexHull(hand_segment)
     
@@ -134,6 +121,7 @@ def count_fingers(thresholded, hand_segment):
 
 
 if __name__ == "__main__":
+    
     cam = cv2.VideoCapture(0)
 
     # Intialize a frame count
@@ -157,10 +145,10 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (7, 7), 0)
 
-        # For the first 30 frames we will calculate the average of the background.
+        # For the first 60 frames we will calculate the average of the background.
         # We will tell the user while this is happening
         if num_frames < 60:
-            calc_accum_avg(gray, accumulated_weight)
+            accumulate(gray)
             if num_frames <= 59:
                 cv2.putText(frame_copy, "WAIT! GETTING BACKGROUND AVG.", (200, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
                 cv2.imshow("Finger Count",frame_copy)

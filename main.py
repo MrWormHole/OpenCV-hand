@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
-
-# Used for distance calculation later on
-from sklearn.metrics import pairwise
+import math, time # Debugging
 
 # This background will be a global variable that we update through a few functions
 background = None
@@ -12,6 +10,12 @@ roi_top = 20
 roi_bottom = 300
 roi_right = 300
 roi_left = 600
+
+def euclidean_distances(center_point, other_points):
+    result = []
+    for i in range(len(other_points)):
+        result.append(math.sqrt((center_point[0] - other_points[i][0]) ** 2 + (center_point[1] - other_points[i][1]) ** 2))
+    return result
 
 def accumulate(frame, accumulated_weight = 0.5):
     '''
@@ -50,35 +54,30 @@ def segment(frame, threshold = 25):
     return None
 
 def count_fingers(thresholded, hand_segment):
-    # Calculated the convex hull of the hand segment
+    '''
+        Given a thresholded image and hand_segment, compute convex hull then find 4 most outward points. Pick a center of these extreme outward points.
+        Generate a circle with 80% radius of max distance.
+    '''
+    # Compute the convex hull of the hand segment
     conv_hull = cv2.convexHull(hand_segment)
-    
-    # Now the convex hull will have at least 4 most outward points, on the top, bottom, left, and right.
-    # Let's grab those points by using argmin and argmax. Keep in mind, this would require reading the documentation
-    # And understanding the general array shape returned by the conv hull.
 
-    # Find the top, bottom, left , and right.
-    # Then make sure they are in tuple format
+    # Find the most extreme top, bottom, left , right XY coordinates then cast them into tuples.
     top    = tuple(conv_hull[conv_hull[:, :, 1].argmin()][0])
     bottom = tuple(conv_hull[conv_hull[:, :, 1].argmax()][0])
     left   = tuple(conv_hull[conv_hull[:, :, 0].argmin()][0])
     right  = tuple(conv_hull[conv_hull[:, :, 0].argmax()][0])
-
+    
     # In theory, the center of the hand is half way between the top and bottom and halfway between left and right
     cX = (left[0] + right[0]) // 2
     cY = (top[1] + bottom[1]) // 2
-
-    # find the maximum euclidean distance between the center of the palm
-    # and the most extreme points of the convex hull
     
-    # Calculate the Euclidean Distance between the center of the hand and the left, right, top, and bottom.
-    distance = pairwise.euclidean_distances([(cX, cY)], Y=[left, right, top, bottom])[0]
+    # Calculate the Euclidean distances between the assumed center of the hand and the top, left, bottom, and right.
+    circle_center = (cX, cY)
+    outer_points = [top, left, bottom, right]
+    distances = euclidean_distances(circle_center , outer_points)
+    max_distance = max(distances)
     
-    # Grab the largest distance
-    max_distance = distance.max()
-    
-    
-    # Create a circle with 90% radius of the max euclidean distance
+    # Create a circle with radius that is 80% of the max euclidean distance
     radius = int(0.8 * max_distance)
     circumference = (2 * np.pi * radius)
 
@@ -87,7 +86,6 @@ def count_fingers(thresholded, hand_segment):
     
     # draw the circular ROI
     cv2.circle(circular_roi, (cX, cY), radius, 255, 10)
-    
     
     # Using bit-wise AND with the cirle ROI as a mask.
     # This then returns the cut out obtained using the mask on the thresholded hand image.

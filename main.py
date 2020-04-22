@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
-import math, time # Debugging
+import math
 
-# This background will be a global variable that we update through a few functions
+# Global Background
 background = None
-
+ 
 # Region Of Interest
 roi_top = 20
 roi_bottom = 300
@@ -12,14 +12,19 @@ roi_right = 300
 roi_left = 600
 
 def euclidean_distances(center_point, other_points):
-    result = []
+    '''
+        Given a center point and an array of other points, it finds multiple distances from the center to other points.
+        @Returns an array of distances
+    '''
+    distances = []
     for i in range(len(other_points)):
-        result.append(math.sqrt((center_point[0] - other_points[i][0]) ** 2 + (center_point[1] - other_points[i][1]) ** 2))
-    return result
+        distances.append(math.sqrt((center_point[0] - other_points[i][0]) ** 2 + (center_point[1] - other_points[i][1]) ** 2))
+    return distances
 
 def accumulate(frame, accumulated_weight = 0.5):
     '''
         Given a frame and accumulated weight, compute the weighted average
+        @Returns none if there is no backgroud
     '''
     global background
     
@@ -34,10 +39,11 @@ def accumulate(frame, accumulated_weight = 0.5):
 def segment(frame, threshold = 25):
     '''
         Given a frame and threshold, compute countours of foreground and pick the largest area as hand segment
+        @Returns thresholded background and countours of the hand
     '''
     global background
     
-    # Calculate absolute difference between the backgroud and the passed in frame
+    # Calculate absolute difference between the background and the passed in frame
     diff = cv2.absdiff(background.astype("uint8"), frame)
 
     # Apply a threshold to the difference to get the foreground
@@ -56,8 +62,8 @@ def segment(frame, threshold = 25):
 def count_fingers(thresholded, hand_segment):
     '''
         Given a thresholded image and hand_segment, compute convex hull then find 4 most outward points. Pick a center of these extreme outward points.
-        Generate a circle with 80% radius of max distance. 
-        Cut out obtained thresholded using the generated circle.
+        Then generate a circle with 80% radius of max distance. Cut out obtained thresholded using the generated circle. Then do a bounding box check on remaning contours to determine fingertips
+        @Returns finger count and contours of the fingertips
     '''
     # Compute the convex hull of the hand segment
     conv_hull = cv2.convexHull(hand_segment)

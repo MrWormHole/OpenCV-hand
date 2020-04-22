@@ -128,15 +128,14 @@ if __name__ == "__main__":
 
         # For the first 60 frames we will calculate the average of the background.
         if num_frames < 60:
+            # Accumulate the backgroud
             accumulate(gray)
             if num_frames <= 59:
                 cv2.putText(frame_copy, "WAIT! GETTING CURRENT BG", (200, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
                 cv2.imshow("Finger Count", frame_copy)
         else:
-            # Segment the hand region if we have the backgroud
+            # Segment the hand region if we have the background
             hand = segment(gray)
-
-            # First check if we were able to detect a hand
             if hand is not None:
                 thresholded, hand_segment = hand
                 # Draw contours around hand segment

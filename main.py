@@ -136,9 +136,9 @@ if __name__ == "__main__":
         if num_frames < 60:
             # Accumulate the backgroud
             accumulate(gray)
-            if num_frames <= 59:
-                cv2.putText(frame_copy, "WAIT! GETTING CURRENT BG", (200, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-                cv2.imshow("Finger Count", frame_copy)
+            cv2.putText(frame_copy, "WAIT! GETTING CURRENT BG", (200, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+            cv2.imshow("Finger Count", frame_copy)
+            num_frames += 1
         else:
             # Segment the hand region if we have the background
             hand = segment(gray)
@@ -157,8 +157,6 @@ if __name__ == "__main__":
 
         # Draw ROI Rectangle on frame copy
         cv2.rectangle(frame_copy, (roi_left, roi_top), (roi_right, roi_bottom), (0,255,0), 5)
-        # Increment number of frames
-        num_frames += 1
         # Display the unthresholded frame with segmented hand(WINDOW)
         cv2.imshow("Finger Count", frame_copy)
 

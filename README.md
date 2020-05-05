@@ -1,7 +1,9 @@
 # OpenCV-hand
-Hand and finger detection with the essentials of OpenCV. Working on improvements and bugs
+Hand and finger detection with the essentials of OpenCV.
 
 ![hand_convex](https://user-images.githubusercontent.com/22800416/75274819-92943c80-5814-11ea-821b-6636bc5ad5ee.png)
+
+![hand_finger_segmented](https://user-images.githubusercontent.com/22800416/81083713-d24e6300-8eec-11ea-9629-7aed90750330.png)
 
 ### Required Dependencies(Pipfile already specified those, Follow Getting Started)
 * python 3.8
@@ -11,7 +13,7 @@ Hand and finger detection with the essentials of OpenCV. Working on improvements
 ### Getting Started
 Clone the repo
 ```
-  git clone https://github.com/MrWormHole/OpenCV-hand.git
+git clone https://github.com/MrWormHole/OpenCV-hand.git
 ```
 Install pipenv for managing virtualenvs
 ```
